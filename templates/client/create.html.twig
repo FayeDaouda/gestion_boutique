@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un client{% endblock %}
+
+{% block body %}
+    <h1>Créer un client</h1>
+    {{ form_start(form) }}
+        {{ form_row(form.surname) }}
+        {{ form_row(form.telephone) }}
+        {{ form_row(form.adresse) }}
+        {{ form_row(form.associateUser) }}
+        
+        <div id="user-fields" style="display: none;">
+            {{ form_row(form.user.email) }}
+            {{ form_row(form.user.login) }}
+            {{ form_row(form.user.password) }}
+        </div>
+        
+        <button type="submit">Enregistrer</button>
+    {{ form_end(form) }}
+
+    <script>
+        document.getElementById('client_form_associateUser').addEventListener('change', function() {
+            document.getElementById('user-fields').style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+{% endblock %}

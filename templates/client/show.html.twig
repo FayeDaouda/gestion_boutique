@@ -3,6 +3,22 @@
 {% block title %}Détails du Client{% endblock %}
 
 {% block body %}
+
+{% if formData is defined %}
+    <h2>Informations récupérées du formulaire :</h2>
+    <ul>
+        <li>Montant : {{ formData.montant }}</li>
+        <li>Montant versé : {{ formData.montantVerser }}</li>
+    </ul>
+{% endif %}
+
+
+{% for message in app.flashes('error') %}
+    <div class="bg-red-600 text-white p-4 rounded mb-4">
+        {{ message }}
+    </div>
+{% endfor %}
+
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold">Détails du Client - {{ client.surname }}</h1>

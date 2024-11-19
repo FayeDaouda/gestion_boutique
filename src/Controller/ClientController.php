@@ -55,11 +55,37 @@ public function create(Request $request, EntityManagerInterface $entityManager):
     $adresse = $formData['adresse'] ?? null;
     $userAccountId = $formData['user_account_id'] ?? null;
 
+
+
+     // Récupérer la liste des clients
+     $clients = $entityManager->getRepository(Client::class)->findAll();
+
+     // Récupérer la liste des utilisateurs
+     $users = $entityManager->getRepository(User::class)->findAll(); // Ajoutez cette ligne
+ 
+     // Préparer un tableau pour stocker les clients avec le montant dû
+     $clientsWithDebt = [];
+ 
+     foreach ($clients as $client) {
+         // Calculer le montant total restant pour chaque client
+         $totalMontantRestant = $client->getTotalMontantRestant();  // Utilise la méthode définie dans Client.php
+         
+         // Ajouter le montant dû au tableau avec le client
+         $clientsWithDebt[] = [
+             'client' => $client,
+             'montantRestant' => $totalMontantRestant
+         ];
+     }
+
+    
+
     // Vérifier que les champs obligatoires sont présents
     if (!$surname || !$telephone) {
-
         $this->addFlash('error', 'Les champs Nom et Téléphone sont obligatoires.');
-        return $this->redirectToRoute('client_create');
+        return $this->render('client/index.html.twig', [
+            'clientsWithDebt' => $clientsWithDebt,
+            'users' => $users, // Assurez-vous de passer la variable 'users' à la vue
+        ]);
     }
 
     // Vérification d'unicité pour le nom et le téléphone
@@ -68,13 +94,19 @@ public function create(Request $request, EntityManagerInterface $entityManager):
 
     if ($existingSurname) {
         $this->addFlash('error', 'Un client avec ce nom existe déjà.');
-        return $this->redirectToRoute('client_create');
+        return $this->render('client/index.html.twig', [
+            'clientsWithDebt' => $clientsWithDebt,
+            'users' => $users, // Assurez-vous de passer la variable 'users' à la vue
+        ]);
         
     }
 
     if ($existingTelephone) {
         $this->addFlash('error', 'Un client avec ce téléphone existe déjà.');
-        return $this->redirectToRoute('client_create');
+        return $this->render('client/index.html.twig', [
+            'clientsWithDebt' => $clientsWithDebt,
+            'users' => $users, // Assurez-vous de passer la variable 'users' à la vue
+        ]);
         
     }
 
@@ -177,6 +209,7 @@ public function create(Request $request, EntityManagerInterface $entityManager):
             'totalMontantRestant' => $totalMontantRestant,
         ]);
     }
+
 
    
 

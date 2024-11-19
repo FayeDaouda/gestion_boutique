@@ -1,8 +1,18 @@
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Liste des Clients{% endblock %}
 
 {% block body %}
+
+
+    {% for message in app.flashes('error') %}
+    <div class="bg-red-600 text-white p-4 rounded mb-4">
+        {{ message }}
+    </div>
+{% endfor %}
+
+
     <div class="container mx-auto p-6">
         <!-- Header with button to add client -->
         <div class="flex justify-between items-center mb-4">
@@ -56,6 +66,8 @@
         <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
             <h2 class="text-xl font-bold mb-4">Ajouter un Client</h2>
             <form action="{{ path('client_create') }}" method="post">
+                <div id="error-message" class="text-red-500 text-sm mb-4"></div>
+
                 <div class="mb-4">
                     <label for="surname" class="block text-sm font-medium text-gray-700">Nom</label>
                     <input type="text" id="surname" name="surname" class="w-full px-4 py-2 border rounded-lg" required>
@@ -107,5 +119,52 @@
                 row.style.display = telephone.includes(filter) ? "" : "none";
             });
         }
+
+          const existingClients = {{ clientsWithDebt | json_encode() | raw }};
+
+function isClientExisting(surname, telephone) {
+    return existingClients.some(client => 
+        client.client.surname.toLowerCase() === surname.toLowerCase() || 
+        client.client.telephone === telephone
+    );
+}
+
+// Met à jour l'état du formulaire en fonction de l'existence du client
+function validateForm() {
+    const surname = document.getElementById('surname').value.trim();
+    const telephone = document.getElementById('telephone').value.trim();
+    const surnameInput = document.getElementById('surname');
+    const telephoneInput = document.getElementById('telephone');
+    let valid = true;
+
+    if (isClientExisting(surname, telephone)) {
+        surnameInput.classList.add('border-red-500');
+        telephoneInput.classList.add('border-red-500');
+        document.getElementById('error-message').textContent = 
+            "Un client avec ce nom ou téléphone existe déjà.";
+        valid = false;
+    } else {
+        surnameInput.classList.remove('border-red-500');
+        telephoneInput.classList.remove('border-red-500');
+        document.getElementById('error-message').textContent = "";
+    }
+    return valid;
+}
+
+// Lors de la soumission du formulaire
+document.querySelector('form').addEventListener('submit', function (event) {
+    if (!validateForm()) {
+        event.preventDefault(); // Annule l'envoi du formulaire
+    }
+});
+
+// Validation en direct
+['input', 'blur'].forEach(event => {
+    document.getElementById('surname').addEventListener(event, validateForm);
+    document.getElementById('telephone').addEventListener(event, validateForm);
+});
+
+
+        
     </script>
 {% endblock %}
